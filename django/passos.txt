@@ -1,0 +1,83 @@
+# Descrição
+Sistema para gerenciar as inscrições nos minicursos do próximo encoinfo.
+* o admin do django será utilizado pelos organizadores para realizar a inscrição dos participantes;
+
+## Criando o projeto:
+
+    django-admin startproject encoinfo .
+
+Após criar o projeto:
+* defina o idioma do projeto para português:
+    * [Documentação 'LANGUAGE_CODE'](https://docs.djangoproject.com/en/1.9/ref/settings/#language-code)
+    * LANGUAGE_CODE = 'pt-BR'
+* desative o uso de fuso-horário (USE_TZ = False)
+    * [Documentação 'TIMEZONE'](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-TIME_ZONE)
+    * [Documentação 'USE_TZ'](https://docs.djangoproject.com/en/1.9/ref/settings/#use-tz)
+    * USE_TZ = False
+
+## Criado o app workshop
+
+    django-admin startapp workshop
+
+Note que a estrutura criada é diferente da estrutura gerada pelo comando 'startproject'.
+
+## Criando models e migrações
+
+Crie o model 'Workshop' em 'workshop/models.py':
+
+    class Workshop(models.Model):
+        nome = models.CharField(u'Nome', max_length=200)
+        slug = models.SlugField(u'Slug', max_length=200)
+        vagas = models.IntegerField(u'Quantidade de vagas')
+
+        def __unicode__(self):
+            return '{}'.format(self.nome)
+
+
+Adicione o app 'workshop' no 'INSTALLED_APPS' do projeto:
+
+    INSTALLED_APPS = [
+        # apps instalados por padrão
+
+        'workshop',
+    ]
+
+Execute as migrações dos apps instalados por padrão:
+
+    $ python manage.py makemigrations showmigrations
+    $ python manage.py makemigrations migrate
+
+Crie uma migração para o app 'workshop':
+
+    $ python manage.py makemigrations workshop
+    $ python manage.py showmigrations workshop
+    $ python manage.py migrate
+
+Agora precisamos representar os inscritos através de um model. Para isso, crie o model 'Participante' no arquivo 'models.py':
+
+    class Participante(models.Model):
+        nome = models.CharField(u'Nome', max_length=200)
+        idade = models.IntegerField(u'Idade', null=True, blank=True)
+        cpf = models.IntegerField(u'CPF', unique=True)
+        workshops = models.ManyToManyField(Workshop, blank=True, related_name='participantes')
+
+        def __unicode__(self):
+            return u'{}'.format(self.nome)
+
+Crie uma migração para o app 'workshop':
+
+    $ python manage.py makemigrations workshop
+    $ python manage.py showmigrations workshop
+    $ python manage.py migrate
+
+## Configurando o admin do django
+
+Crie um usuário para o admin chamado 'admin' com a senha 'admin':
+
+    $ python manage.py createsuperuser
+
+Note que foram utilizados os validadores de senha definidos 'AUTH_PASSWORD_VALIDATORS'. Agora crie o usuário 'admin' com a senha 'rootroot'
+
+## Exercícios
+* é interessante que os inscritos tenham um e-mail para a organização do evento entrar em contato com eles caso necessário. Adicione o campo 'email' no model 'Participante' (lembre de usar os tipos de campos adequados);
+* crie uma home pro site do encoinfo;
