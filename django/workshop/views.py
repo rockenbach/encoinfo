@@ -1,3 +1,11 @@
-from django.shortcuts import render
+# coding: utf-8
 
-# Create your views here.
+from django.views.generic import ListView, DetailView
+
+from models import Workshop
+
+
+class WorkshopList(ListView):
+    model = Workshop
+    template_name = 'lista.html'
+    context_object_name = 'workshops'

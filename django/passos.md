@@ -264,6 +264,53 @@ Como esses models possuem validações diferentes do padrão, temos que falar pr
 
 Agora podemos fazer os testes no admin e ver a mágica acontecendo. Já que tudo está funcionando, podemos entregar o sistema e ganhar nossa grana.
 
+# Adicionando a interface pública
+
+A nossa cliente solicitou uma interface pública para listar todos os workshops e os inscritos em cada curso. Como ela está pagando, vamos desenvolver.
+
+    A partir de agora, os arquivos mencionados no tutorial devem ser consultados no [repositório do Github](https://github.com/rockenbach/encoinfo/tree/master/django).
+
+Para isso, iremos utilizar o conceito as 'class-based views' nas nossas views e não as 'function-based views' como vimos ontem.
+
+Uma view é uma estrutura que recebe uma requisição e retorna uma resposta. Nas 'function-based views' toda url redireciona para uma função, como, por exemplo 'def index(request)', que irá retornar uma resposta específica para uma entrada informada pelo usuário. Nas 'class-based views' toda url redireciona para uma instância de uma classe, que executará uma sequência de funções e também retornará um resultado. Para saber mais sobre as 'class-based views', consulte a [documentação oficial](https://docs.djangoproject.com/en/1.9/topics/class-based-views/) e o site [https://ccbv.co.uk/](https://ccbv.co.uk/).
+
+Vamos começar pela listagem de workshops. No arquivo 'workshop/views.py' iremos criar uma classe que herdará de django.views.generic.ListView. Essa classe tem como objetivo retornar a lista de registros existentes no banco de dados referentes a um model específico. Nosso exemplo terá as seguintes propriedades:
+
+* model: indica qual o model que deve ter os dados listados
+* template_name: indica qual o arquivo de template será usado para renderizar o que o usuário visualiza
+* context_object_name: indica qual o nome da variável que contém a lista de workshops para serem exibidos no template
+
+Crie o template 'templates/lista.html'. Nesse template temos a estrutura de repetição '{% for workshop in workshops %}' que irá iterar sobre a lista de workshops cadastrados, armazenados na variável 'workshops'.
+
+O próximo passo é adicionar a url pública que será acessada. Para isso, temos que alterar os arquivos 'encoinfo/urls.py' e 'workshop/urls.py'.
+
+Alterações em 'encoinfo/urls.py':
+
+    # importamos o include
+    from django.conf.urls import include, url
+    from django.contrib import admin
+
+    urlpatterns = [
+        url(r'^admin/', admin.site.urls),
+        # definimos que a url 'workshops' incluirá todas as urls do app 'workshop'
+        url(r'^workshops/', include('workshop.urls', namespace='workshop')),
+    ]
+
+Alterações em 'workshop/urls.py':
+
+    from django.conf.urls import url
+
+    from views import WorkshopList
+
+    urlpatterns = [
+        url(r'^$', WorkshopList.as_view(), name='lista')
+    ]
+
+Pronto, temos uma lista pública usável. 
+
+*
+
+
 
 ## Exercícios
 * é interessante que os inscritos tenham um e-mail para a organização do evento entrar em contato com eles caso necessário. Adicione o campo 'email' no model 'Participante' (lembre de usar os tipos de campos adequados);
