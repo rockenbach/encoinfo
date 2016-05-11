@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Encoinfo - {{ workshop.nome }}</title>
+    </head>
+    <body>
+        <h1>{{ workshop.nome }}</h1>
+        <hr>
+        <p>
+            Quantidade de vagas: {{ workshop.vagas }}
+        </p>
+        <p>
+            Quantidade de inscritos: {{ workshop.participantes.count }}
+        </p>
+
+        <h2>Inscritos</h2>
+        <ul>
+            {% for participante in workshop.participantes.all %}
+                <li>{{ participante.nome }}</li>
+            {% empty %}
+                <li>Nenhum inscrito até o momento :(</li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>

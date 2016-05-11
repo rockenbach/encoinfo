@@ -9,7 +9,7 @@
         <h1>Lista de workshops do encoinfo 2017</h1>
         <hr>
         {% for workshop in workshops %}
-            <h2><a href="{% url 'workshop:lista' %}">{{ workshop.nome }}</a></h2>
+            <h2><a href="{% url 'workshop:detalhe' workshop.slug %}">{{ workshop.nome }}</a></h2>{{workshop.slug}}
             <p>
                 {{ workshop.descricao }}
             </p>

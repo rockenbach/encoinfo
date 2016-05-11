@@ -9,3 +9,9 @@ class WorkshopList(ListView):
     model = Workshop
     template_name = 'lista.html'
     context_object_name = 'workshops'
+
+
+class WorkshopDetail(DetailView):
+    model = Workshop
+    template_name = 'detalhe.html'
+    context_object_name = 'workshop'

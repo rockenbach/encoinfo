@@ -268,7 +268,7 @@ Agora podemos fazer os testes no admin e ver a mágica acontecendo. Já que tudo
 
 A nossa cliente solicitou uma interface pública para listar todos os workshops e os inscritos em cada curso. Como ela está pagando, vamos desenvolver.
 
-    A partir de agora, os arquivos mencionados no tutorial devem ser consultados no [repositório do Github](https://github.com/rockenbach/encoinfo/tree/master/django).
+A partir de agora, os arquivos mencionados no tutorial devem ser consultados no [repositório do Github](https://github.com/rockenbach/encoinfo/tree/master/django).
 
 Para isso, iremos utilizar o conceito as 'class-based views' nas nossas views e não as 'function-based views' como vimos ontem.
 
@@ -306,12 +306,34 @@ Alterações em 'workshop/urls.py':
         url(r'^$', WorkshopList.as_view(), name='lista')
     ]
 
-Pronto, temos uma lista pública usável. 
+Pronto, temos uma lista pública usável. Agora temos que mostrar a lista de todos os inscritos em cada workshop.
 
-*
+Para isso, iremos criar uma outra classe em 'workshop/views.py', porém, essa classe herdará de django.views.generic.DetailView. Essa classe tem como objetivo mostrar os detalhes de determinado registro existente no banco de dados. No nosso exemplo, a classe criada terá as mesmas propriedades do exemplo anterior: model, template_name e context_object_name.
 
+Crie o template 'templates/detalhe.html'. Nesse template temos a estrutura de repetição '{% for participante in workshop.participantes.all %}' que irá iterar sobre a lista de participantes inscritos, armazenados na queryset participantes, definida no model Participante como related_name 'participantes'.
 
+A única alteração de urls deverá ser feita no arquivo 'workshop/urls.py':
 
-## Exercícios
+    from django.conf.urls import url
+
+    from views import WorkshopList, WorkshopDetail
+
+    urlpatterns = [
+        url(r'^$', WorkshopList.as_view(), name='lista'),
+        url(r'^detalhe/(?P<slug>[\w-]+)/$', WorkshopDetail.as_view(), name='detalhe')
+    ]
+
+Com isso, terminamos nosso minicurso. Dúvidas?
+
+# Exercícios
 * é interessante que os inscritos tenham um e-mail para a organização do evento entrar em contato com eles caso necessário. Adicione o campo 'email' no model 'Participante' (lembre de usar os tipos de campos adequados);
 * crie uma home pro site do encoinfo;
+
+# Referências adicionais
+
+* [models e databases](https://docs.djangoproject.com/en/1.9/topics/db/)
+* [url dispatcher](https://docs.djangoproject.com/en/1.9/topics/http/urls/)
+* [templates](https://docs.djangoproject.com/en/1.9/topics/templates/)
+* [built-in template tags and filters](https://docs.djangoproject.com/en/1.9/ref/templates/builtins/)
+* [forms](https://docs.djangoproject.com/en/1.9/topics/forms/)
+* [documentação oficial](https://docs.djangoproject.com/en/1.9/)
