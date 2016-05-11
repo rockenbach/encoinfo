@@ -181,6 +181,89 @@ Em seguida, vamos personalizar o admin para adicionar alguns filtros:
     admin.site.register(Workshop, WorkshopAdmin)
     admin.site.register(Participante, ParticipanteAdmin)
 
+O que falta pra entregarmos isso e recebermos nosso dinheiro? Talvez a validação para evitar que o curso tenha mais inscritos do que a quantidade de vagas. Pra isso, veremos o conceito de forms.
+
+### Django forms
+
+De uma forma simples, os forms do django são estruturas que podem, dentre outras possibilidades, gerar automaticamente formulários que representem models existentes para que o usuário possa manipular os dados do sistema. Os forms não são usados apenas no admin do django, como veremos durante o curso, eles também são utilizados nos templates para gerar páginas customizadas. Todos os detalhes sobre os forms podem ser consultados na [documentação oficial](https://docs.djangoproject.com/en/1.9/topics/forms/).
+
+Os formulários django são armazenados no arquivo 'forms.py' existente dentro de cada app. Vamos adicionar no arquivo 'workshop/forms.py' dois forms: um para representar o model Workshop e outro pra representar o model 'Participante':
+
+    # coding: utf-8
+    from django import forms
+
+    from models import Workshop, Participante
+
+
+    class WorkshopForm(forms.ModelForm):
+
+        class Meta:
+            model = Workshop
+            fields = '__all__'
+
+        def clean(self):
+            workshop = super(WorkshopForm, self).clean()
+
+            if self.instance.pk:
+                quantidade_inscritos = self.instance.participantes.count()
+                novo_numero_vagas = workshop.get('vagas')
+                if quantidade_inscritos > novo_numero_vagas:
+                    raise forms.ValidationError(
+                        u'O workshop "{}" já possui "{}" inscritos. Por favor, informe uma quantidade de vagas maior ou igual a "{}".'.format(workshop.get('nome'), quantidade_inscritos, quantidade_inscritos)
+                    )
+            return workshop
+
+
+    class ParticipanteForm(forms.ModelForm):
+
+        workshops = forms.ModelMultipleChoiceField(
+            widget=forms.CheckboxSelectMultiple(),
+            queryset=Workshop.objects.all()
+        )
+
+        class Meta:
+            model = Participante
+            fields = '__all__'
+
+        def clean(self):
+            participante = super(ParticipanteForm, self).clean()
+            workshop_selecionado = participante.get('workshops', ())
+
+            for workshop in workshop_selecionado:
+                if workshop.participantes.count() >= workshop.vagas:
+                    raise forms.ValidationError(
+                        u'O workshop "{}" já está lotado.'.format(workshop.nome)
+                    )
+
+            return participante
+
+Como esses models possuem validações diferentes do padrão, temos que falar pro admin do django utilizar eles ao invés do form padrão. Para isso, temos que alterar o arquivo 'workshop/admin.py':
+
+    from django.contrib import admin
+
+    from models import Workshop, Participante
+    # import os forms criados
+    from forms import WorkshopForm, ParticipanteForm
+
+
+    class WorkshopAdmin(admin.ModelAdmin):
+        form = WorkshopForm
+        search_fields = ('nome', )
+        actions = None
+        prepopulated_fields = {'slug': ('nome',)}
+
+
+    class ParticipanteAdmin(admin.ModelAdmin):
+        form = ParticipanteForm
+        list_filter = ('workshops__nome',)
+        search_fields = ('nome', )
+        actions = None
+
+    admin.site.register(Workshop, WorkshopAdmin)
+    admin.site.register(Participante, ParticipanteAdmin)
+
+Agora podemos fazer os testes no admin e ver a mágica acontecendo. Já que tudo está funcionando, podemos entregar o sistema e ganhar nossa grana.
+
 
 ## Exercícios
 * é interessante que os inscritos tenham um e-mail para a organização do evento entrar em contato com eles caso necessário. Adicione o campo 'email' no model 'Participante' (lembre de usar os tipos de campos adequados);
